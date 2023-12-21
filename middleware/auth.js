@@ -48,41 +48,97 @@ exports.registerUser = function (req, res) {
   });
 };
 
+// exports.loginUser = function (req, res) {
+//   const { email, password } = req.body;
+
+//   // Query ke database untuk mendapatkan informasi pengguna berdasarkan email
+//   const sql = 'SELECT * FROM tbl_users WHERE email = ?';
+//   connection.query(sql, [email], (err, results) => {
+//     if (err) {
+//       console.error('Error querying MySQL:', err);
+//       res.status(500).json({ error: 'Internal Server Error' });
+//     } else if (results.length === 0) {
+//       res.status(401).json({ error: 'Invalid email or password' });
+//     } else {
+//       const user = results[0];
+
+//       // Membandingkan password yang di-hash dengan password di database
+//       if (user.password === md5(password)) {
+//         // Menghasilkan token
+//         const token = jwt.sign({ id_user: user.id_user }, 'akusayangkamuloh', { expiresIn: '1h' });
+
+//         // Menyimpan token ke dalam kolom 'token' di database
+//         const updateTokenSql = 'UPDATE tbl_users SET token = ? WHERE id_user = ?';
+//         connection.query(updateTokenSql, [token, user.id_user], (err) => {
+//           if (err) {
+//             console.error('Error updating token in MySQL:', err);
+//             res.status(500).json({ error: 'Internal Server Error' });
+//           } else {
+//             res.json({ token });
+//           }
+//         });
+//       } else {
+//         res.status(401).json({ error: 'Invalid email or password' });
+//       }
+//     }
+//   });
+// };
 exports.loginUser = function (req, res) {
-  const { email, password } = req.body;
+  var post = {
+    password: req.body.password,
+    email: req.body.email,
+  };
 
-  // Query ke database untuk mendapatkan informasi pengguna berdasarkan email
-  const sql = 'SELECT * FROM tbl_users WHERE email = ?';
-  connection.query(sql, [email], (err, results) => {
-    if (err) {
-      console.error('Error querying MySQL:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    } else if (results.length === 0) {
-      res.status(401).json({ error: 'Invalid email or password' });
+  var query = 'SELECT * FROM ?? WHERE ??=? AND ??=?';
+  var table = ['tbl_users', 'password', md5(post.password), 'email', post.email];
+
+  query = mysql.format(query, table);
+
+  connection.query(query, function (error, rows) {
+    if (error) {
+      console.log(error);
     } else {
-      const user = results[0];
+      if (rows.length == 1) {
+        var token = jwt.sign({ rows }, config.secret, {
+          //ubah expires dalam ms
+          expiresIn: '2400000',
+        });
 
-      // Membandingkan password yang di-hash dengan password di database
-      if (user.password === md5(password)) {
-        // Menghasilkan token
-        const token = jwt.sign({ id_user: user.id_user }, config.secret, { expiresIn: '24000000' });
+        id_user = rows[0].id_user;
 
-        // Menyimpan token ke dalam kolom 'token' di database
-        const updateTokenSql = 'UPDATE tbl_users SET token = ? WHERE id_user = ?';
-        connection.query(updateTokenSql, [token, user.id_user], (err) => {
-          if (err) {
-            console.error('Error updating token in MySQL:', err);
-            res.status(500).json({ error: 'Internal Server Error' });
+        var expired = 2400000;
+
+        var data = {
+          id_user: id_user,
+          access_token: token,
+          ip_address: ip.address(),
+        };
+
+        var query = 'INSERT INTO ?? SET ?';
+        var table = ['tbl_token'];
+
+        query = mysql.format(query, table);
+        connection.query(query, data, function (error, rows) {
+          if (error) {
+            console.log(error);
           } else {
             res.json({
-              user_id: user.id_user,
+              success: true,
+              message: 'Token JWT tergenerate!',
               token: token,
+              //4 tambahkan expired time
+              expires: expired,
+              currUser: data.id_user,
             });
           }
         });
       } else {
-        res.status(401).json({ error: 'Invalid email or password' });
+        res.json({ Error: true, Message: 'Email atau password salah!' });
       }
     }
   });
+};
+exports.checkRoute = function (req, res) {
+  const id_user = req.id_user;
+  res.json({ id_user });
 };

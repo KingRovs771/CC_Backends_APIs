@@ -9,7 +9,7 @@ exports.index = function (req, res) {
 
 //menampilkan semua data users
 exports.eWallet = function (req, res) {
-  const id_user = req.userId;
+  const id_user = req.auth.id_user;
 
   // Query ke database untuk mendapatkan saldo dari e-wallet (contoh)
   const ewalletSql = 'SELECT IFNULL(SUM(tbl_investor.final), 0) as saldo FROM tbl_investor WHERE id_user = ?';
@@ -31,7 +31,7 @@ exports.eWallet = function (req, res) {
 
 exports.TopUp = function (req, res) {
   const { add } = req.body;
-  const userId = req.userId;
+  const userId = req.auth.id_user;
 
   // Pastikan nilai add positif (karena ini adalah topup)
   if (add <= 0) {
@@ -57,7 +57,7 @@ exports.TopUp = function (req, res) {
 
 exports.purchaseUmkm = function (req, res) {
   const { id_umkm, add } = req.body;
-  const userId = req.userId;
+  const userId = req.auth.id_user;
 
   // Pastikan nilai add positif (karena ini adalah purchase)
   if (add <= 0) {
@@ -66,8 +66,8 @@ exports.purchaseUmkm = function (req, res) {
 
   // Query untuk memasukkan data purchase ke dalam tabel
   const insertPurchaseSql = `
-    INSERT INTO tbl_investor (id_user, id_umkm, type, add, final)
-    VALUES (?, ?, 'Purchase', ?, (SELECT IFNULL(SUM(final), 0) - ? FROM tbl_investor WHERE id_user = ?))
+    INSERT INTO tbl_investor (id_user, id_umkm, type, add, final, update_time)
+    VALUES (?, ?, 'Purchase', ?, (SELECT IFNULL(SUM(final), 0) - ? FROM nama_tabel WHERE id_user = ?), NOW())
   `;
   connection.query(insertPurchaseSql, [userId, id_umkm, add, add, userId], (err, result) => {
     if (err) {
@@ -76,7 +76,21 @@ exports.purchaseUmkm = function (req, res) {
     } else {
       // Mengembalikan saldo terbaru setelah purchase dari hasil query
       const saldo_ewallet = result.insertId ? add : 0;
-      res.json({ saldo_ewallet });
+
+      // Update invest_amount di tbl_umkm
+      const updateInvestAmountSql = `
+        UPDATE tbl_umkm
+        SET invest_amount = invest_amount + ?
+        WHERE id_umkm = ?
+      `;
+      connection.query(updateInvestAmountSql, [add, id_umkm], (err, updateResult) => {
+        if (err) {
+          console.error('Error updating invest_amount in tbl_umkm:', err);
+          res.status(500).json({ error: 'Internal Server Error' });
+        } else {
+          res.json({ saldo_ewallet });
+        }
+      });
     }
   });
 };
