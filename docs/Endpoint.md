@@ -109,16 +109,21 @@ res.success :{
   "saldo" : "20000"
 }
 
+add < 0 
+res.error : {
+  'message' : 'Amount must be greater than 0 for purchase.'
+}
 res.error : {
   "message" : "invalid Server Error"
 }
 
-#Topup
+#Invest UMKM
 Method Post
-url : '/topup'
+url : '/purchase'
 
 res.body : {
   userId : by login token,
+  id_umkm : 
   "add" : "20000"
 }
 
@@ -127,6 +132,10 @@ res.success :{
   "saldo" : "0"
 }
 
+add < 0 
+res.error : {
+  'message' : 'Amount must be greater than 0 for purchase.'
+}
 res.error : {
   "message" : "invalid Server Error"
 }
