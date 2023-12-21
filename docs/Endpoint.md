@@ -46,6 +46,93 @@ res.success : {
   'nama_sektor': ,
 }
 
+res.error : {
+  "message" : 'UMKM tidak ditemukan'
+}
+
+#GET UMKM BY ID
+METHOD GET
+url : 'umkm/:id'
+
+res.success : {
+  'id_umkm' :,
+  'nama_umkm' :,
+  'trgt_invest' : ,
+  'invest_amount' :,
+  'tgl_berakhir' :,
+  'bunga' :,
+  'deskripsi':,
+  'img' : ,
+  'nama_sektor': ,
+}
+
+res.error : {
+  'message' : 'UMKM tidak ditemukan'
+}
+
+#GET Provinsi
+Method GET
+url : '/allprovinsi'
+
+res.success :{
+  'id_provinsi',
+  'nama_provinsi'
+}
+
+#GET Sektor
+Method GET
+url : '/allsektor'
+
+res.success :{
+  'id_sektor',
+  'nama_sektor'
+}
+
+#GET Wallet 
+Method GET
+url : '/ewallet'
+
+res.success : {
+  'saldo' : 0,
+}
+
+#Topup
+Method Post
+url : '/topup'
+
+res.body : {
+  userId : by login token,
+  "add" : "20000"
+}
+
+res.success :{
+  "saldo" : "20000"
+}
+
+res.error : {
+  "message" : "invalid Server Error"
+}
+
+#Topup
+Method Post
+url : '/topup'
+
+res.body : {
+  userId : by login token,
+  "add" : "20000"
+}
+
+res.success :{
+  "id_umkm" : "1"
+  "saldo" : "0"
+}
+
+res.error : {
+  "message" : "invalid Server Error"
+}
+
+
+
 
 
 
