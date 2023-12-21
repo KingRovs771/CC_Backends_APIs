@@ -21,5 +21,18 @@ function verifikasi() {
   //     return rest.status(401).send({ auth: false, message: 'Token tidak tersedia!' });
   //   }
   // };
+  const token = req.headers['authorization'];
+
+  if (!token) {
+    return res.status(403).json({ error: 'Token is required' });
+  }
+
+  jwt.verify(token, 'secret_key', (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+    req.userId = decoded.id_user;
+    next();
+  });
 }
 module.exports = verifikasi;

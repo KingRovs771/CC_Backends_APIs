@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/secret');
 const ip = require('ip');
 const { query } = require('express');
+const { use } = require('.');
 
 exports.registerUser = function (req, res) {
   let post = {
@@ -48,53 +49,39 @@ exports.registerUser = function (req, res) {
 };
 
 exports.loginUser = function (req, res) {
-  var post = {
-    password: req.body.password,
-    email: req.body.email,
-  };
+  const { email, password } = req.body;
 
-  let loginQuery = 'SELECT * FROM ?? WHERE ??=? AND ??=?';
-  let table = ['tbl_users', 'password', md5(post.password), 'email', post.email];
-
-  loginQuery = mysql.format(loginQuery, table);
-  connection.query(loginQuery, function (error, rows) {
-    if (error) {
-      console.log(error);
+  // Query ke database untuk mendapatkan informasi pengguna berdasarkan email
+  const sql = 'SELECT * FROM tbl_users WHERE email = ?';
+  connection.query(sql, [email], (err, results) => {
+    if (err) {
+      console.error('Error querying MySQL:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    } else if (results.length === 0) {
+      res.status(401).json({ error: 'Invalid email or password' });
     } else {
-      if (rows.length == 1) {
-        var token = jwt.sign({ rows }, config.secret, {
-          expiresIn: '24000000',
-        });
+      const user = results[0];
 
-        id_user = rows[0].id_user;
+      // Membandingkan password yang di-hash dengan password di database
+      if (user.password === md5(password)) {
+        // Menghasilkan token
+        const token = jwt.sign({ id_user: user.id_user }, config.secret, { expiresIn: '24000000' });
 
-        let data = {
-          id_user: id_user,
-          acces_token: token,
-          ip_address: ip.address(),
-        };
-
-        let queryUpdate = 'INSERT INTO ?? SET ?';
-        let tableTbl = ['tbl_token'];
-
-        queryUpdate = mysql.format(queryUpdate, tableTbl);
-        connection.query(queryUpdate, data, function (error, rows) {
-          if (error) {
-            console.log(error);
+        // Menyimpan token ke dalam kolom 'token' di database
+        const updateTokenSql = 'UPDATE tbl_users SET token = ? WHERE id_user = ?';
+        connection.query(updateTokenSql, [token, user.id_user], (err) => {
+          if (err) {
+            console.error('Error updating token in MySQL:', err);
+            res.status(500).json({ error: 'Internal Server Error' });
           } else {
             res.json({
-              success: 'true',
-              message: 'Token Tergenerate',
+              user_id: user.id_user,
               token: token,
-              currUser: data.id_user,
             });
           }
         });
       } else {
-        res.json({
-          Error: true,
-          Message: 'Email atau Password nya Salah !!',
-        });
+        res.status(401).json({ error: 'Invalid email or password' });
       }
     }
   });
