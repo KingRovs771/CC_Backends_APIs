@@ -5,6 +5,7 @@ const response = require('../res');
 const jwt = require('jsonwebtoken');
 const config = require('../config/secret');
 const ip = require('ip');
+const { query } = require('express');
 
 exports.registerUser = function (req, res) {
   let post = {
@@ -41,6 +42,37 @@ exports.registerUser = function (req, res) {
         });
       } else {
         response.success('Email Sudah Terdaftar');
+      }
+    }
+  });
+};
+
+exports.loginUser = function (req, res) {
+  let post = {
+    email: req.body.email,
+    password: req.body.password,
+  };
+
+  let loginQuery = 'SELECT * FROM ?? WHERE ??=? AND ??=?';
+  let table = ['tbl_users', 'password', md5(post.password), 'email', post.email];
+
+  loginQuery = mysql.format(query, table);
+  connection.query(query, function (error, rows) {
+    if (error) {
+      console.log(error);
+    } else {
+      if (rows == 1) {
+        let token = jwt.sign({ rows }, config.secret, {
+          expiresIn: 604800,
+        });
+        id_user = rows[0].id_user;
+
+        let data = {
+          token: token,
+        };
+
+        let queryUpdate = 'UPDATE ?? SET ? WHERE ??=?';
+        let tableTbl = ['tbl_users'];
       }
     }
   });
