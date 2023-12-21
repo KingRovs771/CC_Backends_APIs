@@ -9,6 +9,7 @@ module.exports = function (app) {
   //Users Route
   app.route('/users').get(data.allUsers);
   app.route('/users/:id').get(data.UsersById);
+  app.route('/register').post(data.RegisterUsers);
 
   //Umkm Route
   app.route('/umkm').get(umkm.AllUmkm);
