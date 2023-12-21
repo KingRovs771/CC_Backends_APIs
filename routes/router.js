@@ -20,7 +20,6 @@ module.exports = function (app) {
   app.route('/umkm/:id').get(umkm.getUmkmById);
 
   //Investor
-  app.route().get();
   //Dokumen
 
   //Userview
