@@ -48,31 +48,53 @@ exports.registerUser = function (req, res) {
 };
 
 exports.loginUser = function (req, res) {
-  let post = {
-    email: req.body.email,
+  var post = {
     password: req.body.password,
+    email: req.body.email,
   };
 
   let loginQuery = 'SELECT * FROM ?? WHERE ??=? AND ??=?';
   let table = ['tbl_users', 'password', md5(post.password), 'email', post.email];
 
-  loginQuery = mysql.format(query, table);
-  connection.query(query, function (error, rows) {
+  loginQuery = mysql.format(loginQuery, table);
+  connection.query(loginQuery, function (error, rows) {
     if (error) {
       console.log(error);
     } else {
-      if (rows == 1) {
-        let token = jwt.sign({ rows }, config.secret, {
-          expiresIn: 604800,
+      if (rows.length == 1) {
+        var token = jwt.sign({ rows }, config.secret, {
+          expiresIn: '24000000',
         });
+
         id_user = rows[0].id_user;
 
         let data = {
-          token: token,
+          id_user: id_user,
+          acces_token: token,
+          ip_address: ip.address(),
         };
 
-        let queryUpdate = 'UPDATE ?? SET ? WHERE ??=?';
-        let tableTbl = ['tbl_users'];
+        let queryUpdate = 'INSERT INTO ?? SET ?';
+        let tableTbl = ['tbl_token'];
+
+        queryUpdate = mysql.format(queryUpdate, tableTbl);
+        connection.query(queryUpdate, data, function (error, rows) {
+          if (error) {
+            console.log(error);
+          } else {
+            res.json({
+              success: 'true',
+              message: 'Token Tergenerate',
+              token: token,
+              currUser: data.id_user,
+            });
+          }
+        });
+      } else {
+        res.json({
+          Error: true,
+          Message: 'Email atau Password nya Salah !!',
+        });
       }
     }
   });
