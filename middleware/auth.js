@@ -19,7 +19,7 @@ exports.registerUser = function (req, res) {
     password: md5(req.body.password),
   };
 
-  let query = 'SELECT email FROM ?? WHERE ??';
+  let query = 'SELECT email FROM ?? WHERE ??=?';
   let table = ['tbl_users', 'email', post.email];
 
   query = mysql.format(query, table);
@@ -41,7 +41,7 @@ exports.registerUser = function (req, res) {
           }
         });
       } else {
-        response.success('Email Sudah Terdaftar');
+        response.success('Email Sudah Terdaftar', res);
       }
     }
   });
@@ -138,6 +138,49 @@ exports.loginUser = function (req, res) {
   });
 };
 exports.checkRoute = function (req, res) {
-  const id_user = req.id_user;
+  const id_user = req.auth.rows[0].id_user;
   res.json({ id_user });
+};
+exports.eWallet = function (req, res) {
+  const id_user = req.auth.rows[0].id_user;
+
+  // Query ke database untuk mendapatkan saldo dari e-wallet (contoh)
+  const ewalletSql = 'SELECT IFNULL(SUM(tbl_investor.final), 0) as saldo FROM tbl_investor WHERE id_user = ?';
+  connection.query(ewalletSql, [id_user], (err, results) => {
+    if (err) {
+      console.error('Error querying e-wallet in MySQL:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    } else {
+      // Memastikan bahwa results selalu memiliki elemen pertama, dan jika tidak, mengembalikan saldo 0
+      const saldo_ewallet = results.length > 0 ? results[0].saldo : 0;
+      const userId = req.userId;
+      res.json({
+        id_user: userId,
+        saldo: saldo_ewallet,
+      });
+    }
+  });
+};
+exports.topUpuser = function (req, res) {
+  const { add } = req.body;
+  const userId = req.auth.rows[0].id_user;
+
+  // Pastikan nilai add positif (karena ini adalah topup)
+  if (add <= 0) {
+    return res.status(400).json({ error: 'Amount must be greater than 0 for topup.' });
+  }
+
+  // Query untuk memasukkan data topup ke dalam tabel
+  const insertTopupSql = 'INSERT INTO tbl_investor (id_user, type,`add`, final) SELECT ?, "Topup", ?, COALESCE(SUM(final), 0) + ? FROM tbl_investor WHERE id_user = ?';
+  connection.query(insertTopupSql, [userId, add, add, userId], (err, result) => {
+    if (err) {
+      console.error('Error inserting topup data to MySQL:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      console.log(err);
+    } else {
+      // Mengembalikan saldo terbaru setelah topup dari hasil query
+      const saldo_ewallet = result.insertId ? add : 0;
+      res.json({ saldo_ewallet });
+    }
+  });
 };

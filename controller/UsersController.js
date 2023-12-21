@@ -73,7 +73,7 @@ exports.RegisterUsers = function (req, res) {
           }
         });
       } else {
-        response.success('Email Sudah Terdaftar');
+        response.success('Email Sudah Terdaftar', res);
       }
     }
   });
