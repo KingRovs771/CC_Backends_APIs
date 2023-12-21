@@ -18,17 +18,17 @@ exports.registerUser = function (req, res) {
     password: md5(req.body.password),
   };
 
-  const query = 'SELECT email FROM ?? WHERE ??';
-  const table = ['tbl_users', 'email', post.email];
+  let query = 'SELECT email FROM ?? WHERE ??';
+  let table = ['tbl_users', 'email', post.email];
 
   query = mysql.format(query, table);
 
-  connection.query(query, function (error, rows, fields) {
+  connection.query(query, function (error, rows) {
     if (error) {
       console.log(error);
     } else {
       if (rows.length == 0) {
-        let query = 'INSERT INTO ?? SET ??';
+        let query = 'INSERT INTO ?? SET ?';
         let table = ['tbl_users'];
 
         query = mysql.format(query, table);

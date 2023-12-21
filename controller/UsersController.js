@@ -33,25 +33,25 @@ exports.UsersById = function (req, res) {
   });
 };
 
-exports.RegisterUsers = function (req, res) {
-  let id_provinsi = req.body.id_provinsi;
-  let nik = req.body.nik;
-  let nama_lengkap = req.body.nama_lengkap;
-  let tgl_lahir = req.body.tgl_lahir;
-  let no_hp = req.body.no_hp;
-  let alamat = req.body.alamat;
-  let email = req.body.email;
-  let password = req.body.password;
+// exports.RegisterUsers = function (req, res) {
+//   let id_provinsi = req.body.id_provinsi;
+//   let nik = req.body.nik;
+//   let nama_lengkap = req.body.nama_lengkap;
+//   let tgl_lahir = req.body.tgl_lahir;
+//   let no_hp = req.body.no_hp;
+//   let alamat = req.body.alamat;
+//   let email = req.body.email;
+//   let password = req.body.password;
 
-  connection.query(
-    'INSERT INTO tbl_users (id_provinsi, nik, nama_lengkap, tgl_lahir, no_hp, alamat, email, password) VALUES(?,?,?,?,?,?,?,?)',
-    [id_provinsi, nik, nama_lengkap, tgl_lahir, no_hp, alamat, email, password],
-    function (error, rows, fields) {
-      if (error) {
-        console.log(error);
-      } else {
-        response.success('Berhasil Register', res);
-      }
-    }
-  );
-};
+//   connection.query(
+//     'INSERT INTO tbl_users (id_provinsi, nik, nama_lengkap, tgl_lahir, no_hp, alamat, email, password) VALUES(?,?,?,?,?,?,?,?)',
+//     [id_provinsi, nik, nama_lengkap, tgl_lahir, no_hp, alamat, email, password],
+//     function (error, rows, fields) {
+//       if (error) {
+//         console.log(error);
+//       } else {
+//         response.success('Berhasil Register', res);
+//       }
+//     }
+//   );
+// };
