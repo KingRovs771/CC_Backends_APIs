@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/secret');
 const ip = require('ip');
 const { query } = require('express');
-const { use } = require('.');
 
 exports.registerUser = function (req, res) {
   let post = {

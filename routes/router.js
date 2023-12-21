@@ -20,7 +20,9 @@ module.exports = function (app) {
   //Users Route
   app.route('/users').get(data.allUsers);
   app.route('/users/:id').get(data.UsersById);
-
+  app.route('/registeruser').post(data.RegisterUsers);
+  app.route('/loginuser').post(data.loginUser);
+  app.route('/checkroute', verifikasi).get(data.checkRoute);
   //Umkm Route
   app.route('/umkm').get(umkm.AllUmkm);
   app.route('/umkm/:id').get(umkm.getUmkmById);

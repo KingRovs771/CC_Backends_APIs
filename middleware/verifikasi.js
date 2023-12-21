@@ -15,8 +15,6 @@ function verifikasi(req, res, next) {
       } else {
         // Jika verifikasi berhasil, tambahkan decoded ke req.auth
         req.auth = decoded;
-        req.id_user = decoded.id_user;
-
         next();
       }
     });
