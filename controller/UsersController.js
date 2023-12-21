@@ -10,7 +10,7 @@ exports.index = function (req, res) {
 //menampilkan semua data users
 exports.allUsers = function (req, res) {
   connection.query(
-    'SELECT tbl_users.id_user, tbl_users.nama_lengkap, tbl_users.email, tbl_bank.id_bank, tbl_bank.nama_bank, tbl_provinsi.id_provinsi, tbl_provinsi.nama_provinsi FROM tbl_users INNER JOIN tbl_provinsi ON tbl_users.id_provinsi = tbl_provinsi.id_provinsi INNER JOIN tbl_bank ON tbl_users.id_bank = tbl_bank.id_bank',
+    'SELECT tbl_users.id_user, tbl_users.nama_lengkap, tbl_users.email, tbl_bank.id_bank, tbl_bank.nama_bank, tbl_provinsi.id_provinsi, tbl_provinsi.nama_provinsi FROM tbl_users INNER JOIN tbl_provinsi ON tbl_users.id_provinsi = tbl_provinsi.id_provinsi',
     function (error, rows, fields) {
       if (error) {
         console.log(error);
