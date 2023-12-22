@@ -47,41 +47,6 @@ exports.registerUser = function (req, res) {
   });
 };
 
-// exports.loginUser = function (req, res) {
-//   const { email, password } = req.body;
-
-//   // Query ke database untuk mendapatkan informasi pengguna berdasarkan email
-//   const sql = 'SELECT * FROM tbl_users WHERE email = ?';
-//   connection.query(sql, [email], (err, results) => {
-//     if (err) {
-//       console.error('Error querying MySQL:', err);
-//       res.status(500).json({ error: 'Internal Server Error' });
-//     } else if (results.length === 0) {
-//       res.status(401).json({ error: 'Invalid email or password' });
-//     } else {
-//       const user = results[0];
-
-//       // Membandingkan password yang di-hash dengan password di database
-//       if (user.password === md5(password)) {
-//         // Menghasilkan token
-//         const token = jwt.sign({ id_user: user.id_user }, 'akusayangkamuloh', { expiresIn: '1h' });
-
-//         // Menyimpan token ke dalam kolom 'token' di database
-//         const updateTokenSql = 'UPDATE tbl_users SET token = ? WHERE id_user = ?';
-//         connection.query(updateTokenSql, [token, user.id_user], (err) => {
-//           if (err) {
-//             console.error('Error updating token in MySQL:', err);
-//             res.status(500).json({ error: 'Internal Server Error' });
-//           } else {
-//             res.json({ token });
-//           }
-//         });
-//       } else {
-//         res.status(401).json({ error: 'Invalid email or password' });
-//       }
-//     }
-//   });
-// };
 exports.loginUser = function (req, res) {
   var post = {
     password: req.body.password,
@@ -213,6 +178,30 @@ exports.purchaseUmkm = function (req, res) {
         } else {
           res.json({ saldo_ewallet });
         }
+      });
+    }
+  });
+};
+
+exports.getUserById = function (req, res) {
+  const id_user = req.auth.rows[0].id_user;
+  let queryGet = 'SELECT * FROM ?? WHERE ?? =?';
+
+  let table = ['tbl_users', 'id_user', id_user];
+
+  queryGet = mysql.format(queryGet, table);
+  connection.query(queryGet, function (error, result, fields) {
+    if (error) {
+    } else {
+      res.status(200).json({
+        error: 'false',
+        message: 'Id user Berhasil ditemukan',
+        rows: {
+          id_user: id_user,
+          nik: result[0].nik,
+          nama_lengkap: result[0].nama_lengkap,
+          email: result[0].email,
+        },
       });
     }
   });
