@@ -160,7 +160,7 @@ exports.purchaseUmkm = function (req, res) {
   }
 
   // Query untuk memasukkan data purchase ke dalam tabel
-  const insertPurchaseSql = 'INSERT INTO tbl_investor (id_user, type,`add`, final) SELECT ?, "Purhcase", ?, COALESCE(SUM(final), 0) - ? FROM tbl_investor WHERE id_user = ?';
+  const insertPurchaseSql = 'INSERT INTO tbl_investor (id_user, type,`add`, final) SELECT ?, "Purchase", ?, COALESCE(SUM(final), 0) - ? FROM tbl_investor WHERE id_user = ?';
   connection.query(insertPurchaseSql, [userId, id_umkm, add, add, userId], (err, result) => {
     if (err) {
       console.error('Error inserting purchase data to MySQL:', err);

@@ -26,7 +26,7 @@ module.exports = function (app) {
   //Umkm Route
   app.route('/umkm').get(umkm.AllUmkm);
   app.route('/umkm/:id').get(umkm.getUmkmById);
-  app.route('/umkm/:id').get(umkm.getUserView);
+  app.route('/getuserview').get(umkm.getUserView);
   //Investor
   app.route('/ewallet', verifikasi).get(invest.eWallet);
   app.route('/topup', verifikasi).post(invest.TopUp);
