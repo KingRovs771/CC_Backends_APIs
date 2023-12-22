@@ -30,3 +30,14 @@ exports.getUmkmById = function (req, res) {
     }
   );
 };
+
+exports.getUserView = function (req, res) {
+  let id_umkm = req.params.id;
+  connection.query('SELECT tbl_umkm.id_umkm, tbl_umkm.nama_umkm, FROM tbl_umkm INNER JOIN tbl_userview ON ? = tbl_userview.id_umkm', function (error, rows, fields) {
+    if (error) {
+      console.log(error);
+    } else {
+      response.success(rows, res);
+    }
+  });
+};

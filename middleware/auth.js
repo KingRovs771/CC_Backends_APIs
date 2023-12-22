@@ -184,3 +184,36 @@ exports.topUpuser = function (req, res) {
     }
   });
 };
+
+exports.purchaseUmkm = function (req, res) {
+  const { id_umkm, add } = req.body;
+  const userId = req.auth.rows[0].id_user;
+
+  // Pastikan nilai add positif (karena ini adalah purchase)
+  if (add <= 0) {
+    return res.status(400).json({ error: 'Amount must be greater than 0 for purchase.' });
+  }
+
+  // Query untuk memasukkan data purchase ke dalam tabel
+  const insertPurchaseSql = 'INSERT INTO tbl_investor (id_user, type,`add`, final) SELECT ?, "Purhcase", ?, COALESCE(SUM(final), 0) - ? FROM tbl_investor WHERE id_user = ?';
+  connection.query(insertPurchaseSql, [userId, id_umkm, add, add, userId], (err, result) => {
+    if (err) {
+      console.error('Error inserting purchase data to MySQL:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    } else {
+      // Mengembalikan saldo terbaru setelah purchase dari hasil query
+      const saldo_ewallet = result.insertId ? add : 0;
+
+      // Update invest_amount di tbl_umkm
+      const updateInvestAmountSql = ` UPDATE tbl_umkm SET invest_amount = invest_amount + ? WHERE id_umkm = ?`;
+      connection.query(updateInvestAmountSql, [add, id_umkm], (err, updateResult) => {
+        if (err) {
+          console.error('Error updating invest_amount in tbl_umkm:', err);
+          res.status(500).json({ error: 'Internal Server Error' });
+        } else {
+          res.json({ saldo_ewallet });
+        }
+      });
+    }
+  });
+};
